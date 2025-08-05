@@ -815,6 +815,11 @@ func (config *Config) resolve() (changedFields set.Set[string], err error) {
 		}
 	}
 
+	// Note: ServiceLoadBalancerAggregation is not a Felix config parameter,
+	// it's defined in BGPConfiguration resource. The interaction between
+	// ServiceLoadBalancerAggregation and ServiceLoopPrevention is handled
+	// dynamically in the dataplane based on BGP configuration updates.
+
 	changedFields = set.New[string]()
 	kind := reflect.TypeOf(Config{})
 	for ii := 0; ii < kind.NumField(); ii++ {
@@ -983,6 +988,9 @@ func (config *Config) Validate() (err error) {
 				" - except that either TyphaCN or TyphaURISAN may be left unset.")
 		}
 	}
+
+	// Note: ServiceLoadBalancerAggregation validation is handled dynamically
+	// based on BGPConfiguration resource updates, not in Felix config validation.
 
 	if err != nil {
 		config.Err = err
@@ -1278,6 +1286,7 @@ type Param interface {
 	Parse(raw string) (result interface{}, err error)
 	setDefault(*Config)
 	SchemaDescription() string
+	Validate(*Config) error
 }
 
 func FromConfigUpdate(msg *proto.ConfigUpdate) *Config {

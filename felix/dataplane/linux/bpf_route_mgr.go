@@ -671,7 +671,13 @@ func (m *bpfRouteManager) onBGPConfigUpdate(update *proto.GlobalBGPConfigUpdate)
 	blockedCIDRs := []string{}
 	blockedCIDRs = append(blockedCIDRs, update.GetServiceClusterCidrs()...)
 	blockedCIDRs = append(blockedCIDRs, update.GetServiceExternalCidrs()...)
-	blockedCIDRs = append(blockedCIDRs, update.GetServiceLoadbalancerCidrs()...)
+
+	// Check if ServiceLoadBalancerAggregation is disabled
+	// If disabled, we don't need to block LoadBalancer CIDRs for loop prevention
+	// since each service will have its own /32 route
+	if update.GetServiceLoadbalancerAggregation() != "Disabled" {
+		blockedCIDRs = append(blockedCIDRs, update.GetServiceLoadbalancerCidrs()...)
+	}
 
 	cidrsToDel := set.New[ip.CIDR]()
 	cidrsToDel.AddSet(m.blockedCIDRs)

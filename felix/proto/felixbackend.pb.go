@@ -5970,8 +5970,12 @@ type GlobalBGPConfigUpdate struct {
 	ServiceLoadbalancerCidrs []string               `protobuf:"bytes,3,rep,name=service_loadbalancer_cidrs,json=serviceLoadbalancerCidrs,proto3" json:"service_loadbalancer_cidrs,omitempty"`
 	LocalWorkloadPeeringIpV4 string                 `protobuf:"bytes,4,opt,name=local_workload_peering_ip_v4,json=localWorkloadPeeringIpV4,proto3" json:"local_workload_peering_ip_v4,omitempty"`
 	LocalWorkloadPeeringIpV6 string                 `protobuf:"bytes,5,opt,name=local_workload_peering_ip_v6,json=localWorkloadPeeringIpV6,proto3" json:"local_workload_peering_ip_v6,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	// ServiceLoadBalancerAggregation controls how LoadBalancer service IPs are advertised.
+	// When set to "Disabled", individual /32 routes are advertised for each service instead of
+	// the full CIDR range. This affects whether service loop prevention is needed.
+	ServiceLoadbalancerAggregation string `protobuf:"bytes,6,opt,name=service_loadbalancer_aggregation,json=serviceLoadbalancerAggregation,proto3" json:"service_loadbalancer_aggregation,omitempty"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *GlobalBGPConfigUpdate) Reset() {
@@ -6035,6 +6039,13 @@ func (x *GlobalBGPConfigUpdate) GetLocalWorkloadPeeringIpV4() string {
 func (x *GlobalBGPConfigUpdate) GetLocalWorkloadPeeringIpV6() string {
 	if x != nil {
 		return x.LocalWorkloadPeeringIpV6
+	}
+	return ""
+}
+
+func (x *GlobalBGPConfigUpdate) GetServiceLoadbalancerAggregation() string {
+	if x != nil {
+		return x.ServiceLoadbalancerAggregation
 	}
 	return ""
 }
@@ -6763,13 +6774,14 @@ const file_felixbackend_proto_rawDesc = "" +
 	"\rpublic_key_v6\x18\x02 \x01(\tR\vpublicKeyV6\x12.\n" +
 	"\x13interface_ipv6_addr\x18\x03 \x01(\tR\x11interfaceIpv6Addr\"7\n" +
 	"\x19WireguardEndpointV6Remove\x12\x1a\n" +
-	"\bhostname\x18\x01 \x01(\tR\bhostname\"\xbf\x02\n" +
+	"\bhostname\x18\x01 \x01(\tR\bhostname\"\x89\x03\n" +
 	"\x15GlobalBGPConfigUpdate\x122\n" +
 	"\x15service_cluster_cidrs\x18\x01 \x03(\tR\x13serviceClusterCidrs\x124\n" +
 	"\x16service_external_cidrs\x18\x02 \x03(\tR\x14serviceExternalCidrs\x12<\n" +
 	"\x1aservice_loadbalancer_cidrs\x18\x03 \x03(\tR\x18serviceLoadbalancerCidrs\x12>\n" +
 	"\x1clocal_workload_peering_ip_v4\x18\x04 \x01(\tR\x18localWorkloadPeeringIpV4\x12>\n" +
-	"\x1clocal_workload_peering_ip_v6\x18\x05 \x01(\tR\x18localWorkloadPeeringIpV6\"Y\n" +
+	"\x1clocal_workload_peering_ip_v6\x18\x05 \x01(\tR\x18localWorkloadPeeringIpV6\x12H\n" +
+	" service_loadbalancer_aggregation\x18\x06 \x01(\tR\x1eserviceLoadbalancerAggregation\"Y\n" +
 	"\vServicePort\x12\x1a\n" +
 	"\bProtocol\x18\x01 \x01(\tR\bProtocol\x12\x12\n" +
 	"\x04Port\x18\x02 \x01(\x05R\x04Port\x12\x1a\n" +

@@ -796,6 +796,10 @@ message GlobalBGPConfigUpdate {
   repeated string service_loadbalancer_cidrs = 3;
   string local_workload_peering_ip_v4 = 4;
   string local_workload_peering_ip_v6 = 5;
+  // ServiceLoadBalancerAggregation controls how LoadBalancer service IPs are advertised.
+  // When set to "Disabled", individual /32 routes are advertised for each service instead of
+  // the full CIDR range. This affects whether service loop prevention is needed.
+  string service_loadbalancer_aggregation = 6;
 }
 
 message ServicePort {

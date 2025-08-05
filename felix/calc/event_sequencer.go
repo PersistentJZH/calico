@@ -1055,6 +1055,7 @@ func (buf *EventSequencer) OnGlobalBGPConfigUpdate(cfg *v3.BGPConfiguration) {
 		}
 		buf.pendingGlobalBGPConfig.LocalWorkloadPeeringIpV4 = cfg.Spec.LocalWorkloadPeeringIPV4
 		buf.pendingGlobalBGPConfig.LocalWorkloadPeeringIpV6 = cfg.Spec.LocalWorkloadPeeringIPV6
+		buf.pendingGlobalBGPConfig.ServiceLoadbalancerAggregation = string(cfg.Spec.ServiceLoadBalancerAggregation)
 	}
 }
 

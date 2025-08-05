@@ -1088,14 +1088,13 @@ When service IP advertisement is enabled, prevent routing loops to service IPs t
 not in use, by dropping or rejecting packets that do not get DNAT'd by kube-proxy.
 Unless set to "Disabled", in which case such routing loops continue to be allowed.
 
-| Detail |   |
-| --- | --- |
-| Environment variable | `FELIX_ServiceLoopPrevention` |
-| Encoding (env var/config file) | One of: <code>Disabled</code>, <code>Drop</code>, <code>Reject</code> (case insensitive) |
-| Default value (above encoding) | `Drop` |
-| `FelixConfiguration` field | `serviceLoopPrevention` (YAML) `ServiceLoopPrevention` (Go API) |
-| `FelixConfiguration` schema | One of: <code>Disabled</code>, <code>Drop</code>, <code>Reject</code>. |
-| Default value (YAML) | `Drop` |
+**Note**: When `ServiceLoadBalancerAggregation` is set to "Disabled", `ServiceLoopPrevention` is automatically disabled to avoid issues with anycast scenarios where some datacenters may not announce specific LoadBalancer IPs. This prevents legitimate traffic from being dropped when using anycast LoadBalancer IPs across multiple datacenters.
+
+**Default**: `Drop`
+
+**Environment Variable**: `FELIX_SERVICELOOPPREVENTION`
+
+**Valid Values**: `Disabled`, `Drop`, `Reject`
 
 ### `SidecarAccelerationEnabled` (config file) / `sidecarAccelerationEnabled` (YAML)
 

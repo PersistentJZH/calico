@@ -407,6 +407,45 @@ var _ = infrastructure.DatastoreDescribe("_BPF-SAFE_ service loop prevention; wi
 			cfg.Spec.ServiceLoadBalancerIPs = nil
 		})
 	})
+
+	It("should not block LoadBalancer CIDRs when ServiceLoadBalancerAggregation is disabled", func() {
+		By("configuring service LB IPs with aggregation disabled")
+		updateBGPConfig(func(cfg *api.BGPConfiguration) {
+			cfg.Spec.ServiceLoadBalancerIPs = []api.ServiceLoadBalancerIPBlock{
+				{
+					CIDR: "10.96.0.0/17",
+				},
+			}
+			// Set aggregation to disabled
+			cfg.Spec.ServiceLoadBalancerAggregation = "Disabled"
+		})
+
+		By("setting ServiceLoopPrevention to Drop")
+		setSvcLoopPrevention(tc, "Drop")
+
+		By("verifying that LoadBalancer CIDRs are not blocked for loop prevention")
+		// When ServiceLoadBalancerAggregation is disabled, LoadBalancer CIDRs
+		// should not be blocked for loop prevention since each service will
+		// have its own /32 route
+		for _, felix := range tc.Felixes {
+			if BPFMode() {
+				Eventually(func() string {
+					return bpfDumpRoutesV4(felix)
+				}, "10s", "1s").ShouldNot(ContainSubstring("10.96.0.0/17: blackhole"))
+			} else {
+				Eventually(getCIDRBlockRules(felix, "iptables-save"), "8s", "0.5s").Should(BeEmpty())
+			}
+		}
+
+		By("test that traffic to LoadBalancer IPs is allowed (no loop prevention)")
+		tryRoutingLoop(true, 64)
+
+		By("resetting BGP config")
+		updateBGPConfig(func(cfg *api.BGPConfiguration) {
+			cfg.Spec.ServiceLoadBalancerIPs = nil
+			cfg.Spec.ServiceLoadBalancerAggregation = ""
+		})
+	})
 })
 
 func setSvcLoopPrevention(tc infrastructure.TopologyContainers, value string) {

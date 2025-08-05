@@ -69,7 +69,13 @@ func (m *serviceLoopManager) CompleteDeferredWork() error {
 		blockedCIDRs := []string{}
 		blockedCIDRs = append(blockedCIDRs, m.pendingGlobalBGPConfig.GetServiceClusterCidrs()...)
 		blockedCIDRs = append(blockedCIDRs, m.pendingGlobalBGPConfig.GetServiceExternalCidrs()...)
-		blockedCIDRs = append(blockedCIDRs, m.pendingGlobalBGPConfig.GetServiceLoadbalancerCidrs()...)
+
+		// Check if ServiceLoadBalancerAggregation is disabled
+		// If disabled, we don't need to block LoadBalancer CIDRs for loop prevention
+		// since each service will have its own /32 route
+		if m.pendingGlobalBGPConfig.GetServiceLoadbalancerAggregation() != "Disabled" {
+			blockedCIDRs = append(blockedCIDRs, m.pendingGlobalBGPConfig.GetServiceLoadbalancerCidrs()...)
+		}
 
 		// Render chains for those cluster CIDRs.
 		newFilterChains := m.ruleRenderer.BlockedCIDRsToIptablesChains(blockedCIDRs, m.ipVersion)
